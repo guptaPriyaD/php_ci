@@ -124,5 +124,68 @@ class Main extends CI_Controller {
 		$this->session->unset_userdata('username');
 		redirect(base_url().  'main/login');
 	}
+
+	public function image_upload() {
+		$data['title'] = 'Upload Image using Ajax Jquery';
+		$data['image_data'] = $this->main_model->fetch_image();
+		$this->load->view('image_upload_view', $data);
+	}
+
+	public function ajax_upload () {
+		if(isset($_FILES['image_file']["name"])) {
+			$image_name = explode('.', $_FILES['image_file']["name"]);
+			$new_image_name = $this->rndStr() . "." . $image_name[1];
+
+			$config['upload_path'] = './upload';
+			$config['allowed_types'] = 'jpg|jpeg|png|gif';
+			$config['file_name'] = $new_image_name;
+
+			$this->load->library('upload', $config);
+
+			if(!$this->upload->do_upload('image_file')) {
+				echo $this->upload->display_errors();
+			} else {
+				$data = $this->upload->data();
+
+				$config['image_library'] = "gd2";
+				$config['source_image'] = './upload/' . $new_image_name;
+				$config['create_thumb'] =  false;
+				$config['maintain_ration'] = false;
+				$config['quality'] = "60%";
+				$config['width'] = 200;
+				$config['height'] = 200;
+				$config['new_image'] = './upload/' . $new_image_name;
+
+				$this->load->library('image_lib', $config);
+				$this->image_lib->resize();
+
+				$image_data = array(
+					'name' => $new_image_name,
+				);
+
+				$this->main_model->insert_image($image_data);
+
+				echo $this->main_model->fetch_image();
+
+				// echo '<img src="' . base_url() . 'upload/' . $data['file_name'] . '" class="img-thumbnail" />';
+			} 
+		}	
+	}
+
+	function rndStr(){
+		$characters = array("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","Z","Y","Z");
+
+		//generate 6 characters from it 
+		$charI = rand(0,25);
+		$charII = rand(0,25);
+		$charIII = rand(0,25);
+		$charIV = rand(0,25);
+		$charV = rand(0,25);
+		$charVI = rand(0,25);
+
+		//output as string
+		$rnd_name = $characters[$charI].$characters[$charII].$characters[$charIII].$characters[$charIV].$characters[$charV].$characters[$charVI] ; 
+		return $rnd_name;
+	}
 }
  
