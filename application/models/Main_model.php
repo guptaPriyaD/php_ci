@@ -16,7 +16,6 @@ class Main_model extends CI_Model {
 
 	function fetch_data() {
 		$this->db->select('id, first_name, last_name');
-		$this->db->select('id, first_name, last_name');
 		$query = $this->db->get('users');
 		return $query;
 	}
@@ -73,4 +72,14 @@ class Main_model extends CI_Model {
 		}
 		return $output;
 	}
+
+	public function is_email_available($email) {
+        $this->db->where('email', $email);
+        $query = $this->db->get('users');
+        if($query->num_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

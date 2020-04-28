@@ -187,5 +187,21 @@ class Main extends CI_Controller {
 		$rnd_name = $characters[$charI].$characters[$charII].$characters[$charIII].$characters[$charIV].$characters[$charV].$characters[$charVI] ; 
 		return $rnd_name;
 	}
+
+	public function email_availability() {
+        $this->load->view('email_check_view');
+	}
+	
+    public function check_email_availability() {
+        if(!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            echo '<label class="text-danger"><span class="glyphicon glyphicon-remove"></span> Invalid Email </span></label>';
+        } else {
+            if($this->main_model->is_email_available($_POST['email'])) {
+                echo '<label class="text-danger"><span class="glyphicon glyphicon-remove"></span> Email already registered</span></label>';
+            } else {
+                echo '<label class="text-success"><span class="glyphicon glyphicon-ok"></span> Email Available</span></label>'; 
+            }
+        }
+    }
 }
  
