@@ -86,7 +86,7 @@ class Main extends CI_Controller {
 
 	function login() {
 		$data['title'] = "Login form with Sessions";
-		$this->load->view('login_view', $data);
+		$this->load->view('main_login_view', $data);
 	}
 
 	function login_validation() {
