@@ -18,21 +18,27 @@ class Main extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index()
-	{
-		$this->load->model('main_model');
+	public function __construct() {
+		parent::__construct();
 
+		//load model 
+		$this->load->model("main_model");
+		
+		//load library
+		$this->load->library('form_validation');
+	}
+	
+	 public function index()
+	{
 		$data["fetch_data"]= $this->main_model->fetch_data();
 		$this->load->view('main_view', $data);		
 	}
 
 	public function form_validation() {
-		$this->load->library('form_validation');
 		$this->form_validation->set_rules("first_name", "First Name", "required|alpha");
 		$this->form_validation->set_rules("last_name", "Last Name", "required|alpha");
 	
 		if($this->form_validation->run()) {
-			$this->load->model('main_model');
 			$data = array(
 				"first_name" => $this->input->post("first_name"),
 				"last_name" => $this->input->post("last_name")
@@ -58,7 +64,6 @@ class Main extends CI_Controller {
 
 	public function delete_data() {
 		$id = $this->uri->segment(3);
-		$this->load->model("main_model");
 		$this->main_model->delete_data($id);
 		redirect(base_url(). "main/deleted");
 	}
@@ -69,7 +74,6 @@ class Main extends CI_Controller {
 
 	public function update_data() {
 		$user_id= $this->uri->segment(3);
-		$this->load->model("main_model");
 		$data['user_data'] = $this->main_model->fetch_single_data($user_id);
 		$data["fetch_data"]= $this->main_model->fetch_data();
 		$this->load->view('main_view', $data);
@@ -78,6 +82,47 @@ class Main extends CI_Controller {
 
 	public function updated() {
 		$this->index();
+	}
+
+	function login() {
+		$data['title'] = "Login form with Sessions";
+		$this->load->view('login_view', $data);
+	}
+
+	function login_validation() {
+		$this->form_validation->set_rules('username', 'Username', 'required');
+		$this->form_validation->set_rules('password', 'Password', 'required');
+		if($this->form_validation->run()) {
+			$username = $this->input->post('username');
+			$password = $this->input->post('password');
+
+			if($this->main_model->can_login($username, $password)) {
+				$session_data = array (
+					'username' => $username
+				);
+				$this->session->set_userdata($session_data);
+				redirect(base_url() . "main/enter");
+			} else {
+				$this->session->set_flashdata('error', 'Invalid username or password');
+				redirect(base_url() . "main/login");
+			}
+		} else {
+			$this->login();
+		}
+	}
+
+	function enter() {
+		if($this->session->userdata('username') != '') {
+			echo '<h2>Welcome - '. $this->session->userdata('username') . '</h2>';
+			echo '<a href="'. base_url() . 'main/logout">Logout</a>';
+		} else {
+			redirect (base_url(). 'main/login');
+		}
+	}
+
+	function logout() {
+		$this->session->unset_userdata('username');
+		redirect(base_url().  'main/login');
 	}
 }
  
